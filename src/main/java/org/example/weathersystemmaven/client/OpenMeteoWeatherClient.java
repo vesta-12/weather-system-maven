@@ -3,6 +3,7 @@ package org.example.weathersystemmaven.client;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.example.weathersystemmaven.dto.WeatherResponse;
 import org.example.weathersystemmaven.exception.WeatherApiException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
@@ -17,11 +18,16 @@ public class OpenMeteoWeatherClient implements WeatherClient {
     private final String geocodingBaseUrl;
     private final String forecastBaseUrl;
 
+    @Autowired
     public OpenMeteoWeatherClient(
             @Value("${weather.api.geocoding-base-url}") String geocodingBaseUrl,
             @Value("${weather.api.forecast-base-url}") String forecastBaseUrl
     ) {
-        this.restClient = RestClient.builder().build();
+        this(RestClient.builder().build(), geocodingBaseUrl, forecastBaseUrl);
+    }
+
+    OpenMeteoWeatherClient(RestClient restClient, String geocodingBaseUrl, String forecastBaseUrl) {
+        this.restClient = restClient;
         this.geocodingBaseUrl = geocodingBaseUrl;
         this.forecastBaseUrl = forecastBaseUrl;
     }
@@ -65,12 +71,8 @@ public class OpenMeteoWeatherClient implements WeatherClient {
     }
 
     private String mapWeatherCodeToCondition(int weatherCode) {
-        if (isSnow(weatherCode)) {
-            return "snow";
-        }
-        if (isRain(weatherCode)) {
-            return "rain";
-        }
+        if (isSnow(weatherCode)) return "snow";
+        if (isRain(weatherCode)) return "rain";
         return "sunny";
     }
 
